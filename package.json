@@ -3,11 +3,14 @@
   "version": "1.0.0",
   "description": "API privada de conjugación",
   "main": "server.js",
+  "engines": {
+    "node": "16.x"
+  },
   "scripts": {
     "start": "node server.js"
   },
   "dependencies": {
-    "conjugator": "^2.1.0",
+    "conjugator": "github:ehoogerbeets/conjugator",
     "cors": "^2.8.5",
     "express": "^4.18.2"
   }
