@@ -9,16 +9,35 @@ app.get("/conjugar/:verbo", (req, res) => {
   try {
     const verbo = req.params.verbo.toLowerCase().trim();
     
-    // Adaptación inteligente para leer la librería en su versión más moderna
-    const conjugador = conjugatorModule.default || conjugatorModule;
-    const resultado = conjugador.conjugate(verbo);
+    // Intento 1: Extraer el motor correctamente
+    let conjugador = conjugatorModule.default || conjugatorModule;
+    
+    // Intento 2: Si la librería es antigua y necesita instanciarse con "new"
+    if (typeof conjugador === "function" && typeof conjugador.conjugate !== "function") {
+      conjugador = new conjugador();
+    }
+    
+    // Intento 3: Conjugar dependiendo de cómo el autor diseñó su código
+    let resultado;
+    if (typeof conjugador.conjugate === "function") {
+      resultado = conjugador.conjugate(verbo);
+    } else if (typeof conjugador === "function") {
+      resultado = conjugador(verbo);
+    } else {
+      throw new Error("No encontramos la instrucción exacta de esta librería.");
+    }
     
     res.json(resultado);
   } catch (error) {
-    res.status(404).json({ error: "Verbo no encontrado o formato incorrecto." });
+    // AHORA SÍ: Mostramos el error técnico exacto en la pantalla
+    res.status(500).json({ 
+        "Alerta": "Este es el error real",
+        "mensaje": error.message,
+        "pistas": Object.keys(conjugatorModule)
+    });
   }
 });
 
 app.listen(process.env.PORT || 3000, () => {
-  console.log("Tu servidor privado de verbos está funcionando 🚀");
+  console.log("Tu servidor privado está funcionando 🚀");
 });
