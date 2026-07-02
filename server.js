@@ -1,10 +1,5 @@
-import express from "express";
-import cors from "cors";
-// 1. Importamos el traductor de lenguajes antiguos
-import { createRequire } from "module";
-
-// 2. Activamos el traductor
-const require = createRequire(import.meta.url);
+const express = require("express");
+const cors = require("cors");
 const conjugador = require("conjugator");
 
 const app = express();
@@ -15,17 +10,13 @@ app.get("/conjugar/:verbo", (req, res) => {
     const verbo = req.params.verbo.toLowerCase().trim();
     let resultado;
 
-    // 3. Probamos todas las formas clásicas en las que el autor pudo exportar su motor
-    if (typeof conjugador === "function") {
-      resultado = conjugador(verbo);
-    } else if (typeof conjugador.conjugate === "function") {
+    // Ejecutamos el motor de la forma original para la que fue diseñado
+    if (typeof conjugador.conjugate === "function") {
       resultado = conjugador.conjugate(verbo);
-    } else if (typeof conjugador.Conjugator === "function") {
-      const motor = new conjugador.Conjugator();
-      resultado = motor.conjugate(verbo);
+    } else if (typeof conjugador === "function") {
+      resultado = conjugador(verbo);
     } else {
-      // Si el autor la escondió en otro sitio, volcamos el diccionario completo para verlo
-      return res.json({ alerta: "Llaves encontradas", contenido: Object.keys(conjugador) });
+      resultado = { alerta: "No se encuentra el motor", pistas: Object.keys(conjugador) };
     }
     
     res.json(resultado);
@@ -35,5 +26,5 @@ app.get("/conjugar/:verbo", (req, res) => {
 });
 
 app.listen(process.env.PORT || 3000, () => {
-  console.log("Tu servidor privado y traducido está funcionando 🚀");
+  console.log("Tu servidor privado definitivo está funcionando 🚀");
 });
